@@ -39,6 +39,15 @@ select {
   font-family: inherit;
 }
 
+/* Hide scrollbar (for horizontal scroll strips) */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Glass morphism card */
 .glass {
   background: rgba(13, 21, 32, 0.9);
