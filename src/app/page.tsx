@@ -7,6 +7,7 @@ import { Trade } from '@/lib/types'
 import TradeCard from '@/components/TradeCard'
 import Navigation from '@/components/Navigation'
 import { AppLogo } from '@/components/Icons'
+import { syncAll } from '@/lib/sync'
 import { Flame } from 'lucide-react'
 
 function StatCard({
@@ -40,7 +41,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     setMounted(true)
-    setTrades(getTrades())
+    const trades = getTrades()
+    setTrades(trades)
+    // Sync all local trades to sheet once per session
+    if (trades.length > 0) syncAll(trades)
   }, [])
 
   if (!mounted) {

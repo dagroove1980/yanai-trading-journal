@@ -6,6 +6,7 @@ import { getTradeById, saveTrade, deleteTrade, calculatePnL } from '@/lib/storag
 import { Trade, EMOTION_OPTIONS, TradeEmotion, TradeRating } from '@/lib/types'
 import { ArrowLeft, Edit2, Trash2, Check, X, Sparkles, Brain } from 'lucide-react'
 import { EMOTION_ICON_MAP } from '@/components/Icons'
+import { syncUpsert, syncDelete } from '@/lib/sync'
 
 function Stars({
   rating,
@@ -115,6 +116,7 @@ export default function TradeDetailPage() {
       ),
     }
     saveTrade(updated)
+    syncUpsert(updated) // fire-and-forget to Google Sheets
     setTrade(updated)
     setEditing(false)
     setSaving(false)
@@ -122,6 +124,7 @@ export default function TradeDetailPage() {
 
   const handleDelete = () => {
     deleteTrade(trade.id)
+    syncDelete(trade.id) // fire-and-forget to Google Sheets
     router.push('/')
   }
 

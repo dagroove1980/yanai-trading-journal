@@ -14,6 +14,7 @@ import {
 } from '@/lib/types'
 import SymbolSearch from '@/components/SymbolSearch'
 import { EMOTION_ICON_MAP } from '@/components/Icons'
+import { syncUpsert } from '@/lib/sync'
 import {
   ArrowLeft,
   Sparkles,
@@ -245,6 +246,7 @@ export default function NewTradePage() {
       aiInsight: aiInsight ?? undefined,
     }
     saveTrade(trade)
+    syncUpsert(trade) // fire-and-forget to Google Sheets
     setSaved(true)
     setTimeout(() => router.push('/'), 800)
   }
