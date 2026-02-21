@@ -6,14 +6,8 @@ import { getTrades, getStats } from '@/lib/storage'
 import { Trade } from '@/lib/types'
 import TradeCard from '@/components/TradeCard'
 import Navigation from '@/components/Navigation'
-import { Flame, TrendingUp, Target, BarChart2 } from 'lucide-react'
-
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Morning'
-  if (h < 17) return 'Afternoon'
-  return 'Evening'
-}
+import { AppLogo } from '@/components/Icons'
+import { Flame } from 'lucide-react'
 
 function StatCard({
   label,
@@ -86,14 +80,22 @@ export default function Dashboard() {
       {/* Header */}
       <div className="px-5 pt-safe pb-2">
         <div className="flex items-start justify-between mb-6">
-          <div>
-            <p className="text-text-muted text-sm mb-0.5">{getGreeting()},</p>
-            <h1 className="text-4xl font-bold text-text leading-tight">
-              Yanai{' '}
-              <span className="inline-block" style={{ color: '#F5B800' }}>
-                📈
-              </span>
-            </h1>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-11 h-11 rounded-2xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,184,0,0.15), rgba(245,184,0,0.04))',
+                border: '1px solid rgba(245,184,0,0.25)',
+              }}
+            >
+              <AppLogo size={28} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F5B800' }}>
+                TradeLog
+              </p>
+              <p className="text-text font-semibold text-sm leading-tight">Yanai&apos;s Journal</p>
+            </div>
           </div>
 
           {streak > 0 && (
@@ -112,7 +114,15 @@ export default function Dashboard() {
       {isEmpty ? (
         /* ─── Empty state ─── */
         <div className="px-5 flex flex-col items-center text-center py-12 fade-in">
-          <div className="text-7xl mb-5">📊</div>
+          <div
+            className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
+            style={{
+              background: 'linear-gradient(135deg, rgba(245,184,0,0.15), rgba(245,184,0,0.04))',
+              border: '1px solid rgba(245,184,0,0.2)',
+            }}
+          >
+            <AppLogo size={44} />
+          </div>
           <h2 className="text-text text-2xl font-bold mb-3">Start Your Journal</h2>
           <p className="text-text-muted text-sm leading-relaxed mb-8 max-w-xs">
             Log your first trade and get personalized AI mentor feedback to accelerate your

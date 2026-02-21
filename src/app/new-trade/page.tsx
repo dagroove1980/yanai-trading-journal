@@ -13,6 +13,7 @@ import {
   WIZARD_STEPS,
 } from '@/lib/types'
 import SymbolSearch from '@/components/SymbolSearch'
+import { EMOTION_ICON_MAP } from '@/components/Icons'
 import {
   ArrowLeft,
   Sparkles,
@@ -502,7 +503,9 @@ export default function NewTradePage() {
               {contextBar}
               <p className="text-text-muted text-xs uppercase tracking-widest mb-3">How did you feel during this trade?</p>
               <div className="grid grid-cols-5 gap-2 mb-7">
-                {EMOTION_OPTIONS.map((e) => (
+                {EMOTION_OPTIONS.map((e) => {
+                  const Icon = EMOTION_ICON_MAP[e.value]
+                  return (
                   <button
                     key={e.value}
                     onClick={() => setEmotion(e.value)}
@@ -512,12 +515,13 @@ export default function NewTradePage() {
                       border: emotion === e.value ? '1.5px solid rgba(245,184,0,0.4)' : '1.5px solid #1A2840',
                     }}
                   >
-                    <span className="text-3xl leading-none">{e.emoji}</span>
+                    <Icon size={36} />
                     <span className="text-xs font-medium leading-none" style={{ color: emotion === e.value ? '#E8EEFF' : '#5A7DA0' }}>
                       {e.label}
                     </span>
                   </button>
-                ))}
+                  )
+                })}
               </div>
 
               <p className="text-text-muted text-xs uppercase tracking-widest mb-1 text-center">How would you rate this trade?</p>
@@ -558,7 +562,10 @@ export default function NewTradePage() {
                       border: `1px solid ${pnlData?.isWin ? 'rgba(0,200,150,0.3)' : 'rgba(255,61,90,0.3)'}`,
                     }}
                   >
-                    <span className="text-2xl">{pnlData?.isWin ? '✅' : '📉'}</span>
+                    {pnlData?.isWin
+                    ? <TrendingUp className="w-6 h-6" style={{ color: '#00C896' }} />
+                    : <TrendingDown className="w-6 h-6" style={{ color: '#FF3D5A' }} />
+                  }
                     <span className="font-bold tabular text-xl" style={{ color: pnlData?.isWin ? '#00C896' : '#FF3D5A' }}>
                       {pnlData?.isWin ? '+' : '-'}${pnlData ? Math.abs(pnlData.pnl).toFixed(2) : '0.00'}
                     </span>

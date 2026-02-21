@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Trade, EMOTION_OPTIONS } from '@/lib/types'
+import { EMOTION_ICON_MAP } from '@/components/Icons'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 function Stars({ rating }: { rating: number }) {
@@ -84,10 +85,12 @@ export default function TradeCard({ trade }: { trade: Trade }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Stars rating={trade.rating} />
-            <div className="flex items-center gap-1.5">
-              <span className="text-base leading-none">{emotion?.emoji}</span>
-              <span className="text-text-muted text-xs">{emotion?.label}</span>
-            </div>
+            {emotion && (
+              <div className="flex items-center gap-1.5">
+                {(() => { const Icon = EMOTION_ICON_MAP[emotion.value]; return <Icon size={20} /> })()}
+                <span className="text-text-muted text-xs">{emotion?.label}</span>
+              </div>
+            )}
           </div>
           {trade.isWin ? (
             <TrendingUp className="w-4 h-4" style={{ color: '#00C896' }} />

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { getTradeById, saveTrade, deleteTrade, calculatePnL } from '@/lib/storage'
 import { Trade, EMOTION_OPTIONS, TradeEmotion, TradeRating } from '@/lib/types'
 import { ArrowLeft, Edit2, Trash2, Check, X, Sparkles, Brain } from 'lucide-react'
+import { EMOTION_ICON_MAP } from '@/components/Icons'
 
 function Stars({
   rating,
@@ -74,7 +75,7 @@ export default function TradeDetailPage() {
   if (!trade) {
     return (
       <div className="min-h-screen bg-bg flex flex-col items-center justify-center px-5 text-center">
-        <p className="text-5xl mb-4">🤔</p>
+        <p className="text-5xl mb-4 text-text-muted">?</p>
         <p className="text-text font-bold text-xl mb-2">Trade not found</p>
         <button
           onClick={() => router.back()}
@@ -441,7 +442,9 @@ export default function TradeDetailPage() {
             <p className="text-text-muted text-xs uppercase tracking-widest mb-3">Emotion</p>
             {editing ? (
               <div className="grid grid-cols-5 gap-2">
-                {EMOTION_OPTIONS.map((e) => (
+                {EMOTION_OPTIONS.map((e) => {
+                  const Icon = EMOTION_ICON_MAP[e.value]
+                  return (
                   <button
                     key={e.value}
                     onClick={() => setEditData((p) => ({ ...p, emotion: e.value }))}
@@ -457,14 +460,15 @@ export default function TradeDetailPage() {
                           : '1px solid transparent',
                     }}
                   >
-                    <span className="text-2xl">{e.emoji}</span>
+                    <Icon size={28} />
                     <span className="text-text-muted text-xs leading-none">{e.label}</span>
                   </button>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-3xl">{emotion?.emoji}</span>
+                {emotion && (() => { const Icon = EMOTION_ICON_MAP[emotion.value]; return <Icon size={28} /> })()}
                 <span className="text-text font-semibold">{emotion?.label}</span>
               </div>
             )}

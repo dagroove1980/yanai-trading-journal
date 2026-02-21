@@ -24,13 +24,21 @@ export async function POST(req: NextRequest) {
       ? `won $${Math.abs(context.pnl).toFixed(2)}`
       : `lost $${Math.abs(context.pnl).toFixed(2)}`
 
-    const prompt = `You're helping a young, motivated trader improve their trading journal reflections. They wrote about ${FIELD_LABELS[field] || field}:
+    const prompt = `You're helping a young trader lightly polish a single field in their trading journal. Your job is minimal editing only — NOT rewriting.
 
+They wrote about ${FIELD_LABELS[field] || field}:
 "${content}"
 
-Trade context: ${context.symbol} ${context.direction} position — they ${result}.
+Trade context: ${context.symbol} ${context.direction} — they ${result}.
 
-Rewrite their reflection to be more insightful and specific. Keep their personal first-person voice. Make it more analytical, concrete, and useful for learning from. 2-3 sentences max. Return ONLY the rewritten text — no quotes, no explanation, no preamble.`
+Rules:
+- Keep at least 85% of their exact words and phrasing
+- Fix grammar, punctuation, or awkward phrasing only
+- Do NOT add any new ideas, insights, or details they didn't write
+- Keep their first-person voice exactly as-is
+- If their text is already clear, barely change it
+
+Return ONLY the lightly polished text — no quotes, no explanation, no preamble.`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { searchSymbols, SymbolEntry, AssetType } from '@/lib/symbols'
 
 const TYPE_STYLE: Record<AssetType, { bg: string; color: string }> = {
@@ -19,6 +19,8 @@ interface Props {
 export default function SymbolSearch({ value, onChange }: Props) {
   const [results, setResults] = useState<SymbolEntry[]>([])
   const [open, setOpen] = useState(false)
+  const touchStartY = useRef<number>(0)
+  const touchMoved = useRef<boolean>(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.toUpperCase()
@@ -82,10 +84,26 @@ export default function SymbolSearch({ value, onChange }: Props) {
             return (
               <button
                 key={`${entry.symbol}-${entry.type}`}
-                // onPointerDown fires before onBlur — prevents dropdown disappearing before click
-                onPointerDown={(e) => {
+                // Desktop: mousedown fires before blur — select immediately
+                onMouseDown={(e) => {
                   e.preventDefault()
                   handleSelect(entry)
+                }}
+                // Mobile: track touch movement to distinguish tap vs scroll
+                onTouchStart={(e) => {
+                  touchStartY.current = e.touches[0].clientY
+                  touchMoved.current = false
+                }}
+                onTouchMove={(e) => {
+                  if (Math.abs(e.touches[0].clientY - touchStartY.current) > 8) {
+                    touchMoved.current = true
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  if (!touchMoved.current) {
+                    e.preventDefault()
+                    handleSelect(entry)
+                  }
                 }}
                 className="w-full flex items-center justify-between px-4 py-3 active:opacity-60 transition-opacity text-left"
                 style={{
