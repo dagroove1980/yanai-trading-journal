@@ -11,12 +11,25 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Yanai's Trading Journal",
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'http://localhost:3000'
+  ),
+  title: "TradeLog — Yanai's Trading Journal",
   description: 'Personal AI-powered trading journal — log trades, get mentor feedback, track your growth.',
+  openGraph: {
+    title: "TradeLog — Yanai's Trading Journal",
+    description: 'Log trades · Get AI mentor feedback · Track your growth.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'TradingJournal',
+    title: 'TradeLog',
   },
 }
 
