@@ -9,7 +9,9 @@ export default function Navigation() {
 
   if (pathname === '/new-trade') return null
 
-  const active = (path: string) => pathname === path ? '#F5B800' : '#5A7DA0'
+  const active = (path: string) => pathname.startsWith(path) && path !== '/'
+    ? '#F5B800'
+    : pathname === path ? '#F5B800' : '#5A7DA0'
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50">
@@ -43,9 +45,9 @@ export default function Navigation() {
             </Link>
           </div>
 
-          <Link href="/tips" className="flex flex-col items-center gap-1 active:scale-90 transition-transform">
-            <Lightbulb className="w-6 h-6" style={{ color: active('/tips') }} />
-            <span className="text-xs font-medium" style={{ color: active('/tips') }}>Tips</span>
+          <Link href="/training" className="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+            <Lightbulb className="w-6 h-6" style={{ color: active('/training') }} />
+            <span className="text-xs font-medium" style={{ color: active('/training') }}>Training</span>
           </Link>
 
           {/* Empty column — balances the layout symmetrically */}
