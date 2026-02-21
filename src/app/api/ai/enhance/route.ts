@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
 const FIELD_LABELS: Record<string, string> = {
   whyEntered: 'why they entered the trade (their pre-trade thesis and reasoning)',
   whatHappened: 'what happened during the trade (the story of the trade)',
@@ -10,6 +8,7 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   try {
     const { field, content, context } = (await req.json()) as {
       field: string
