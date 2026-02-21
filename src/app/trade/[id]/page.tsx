@@ -143,12 +143,12 @@ export default function TradeDetailPage() {
           },
         }),
       })
+      if (!res.ok) throw new Error(`API ${res.status}`)
       const data = await res.json()
-      if (data.enhanced) {
-        setEditData((prev) => ({ ...prev, [field]: data.enhanced }))
-      }
-    } catch {
-      // silent
+      if (!data.enhanced) throw new Error('Empty response')
+      setEditData((prev) => ({ ...prev, [field]: data.enhanced }))
+    } catch (err) {
+      console.error('Enhance failed:', err)
     } finally {
       setEnhancing(null)
     }

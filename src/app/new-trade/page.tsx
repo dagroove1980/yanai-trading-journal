@@ -12,11 +12,13 @@ import {
   EMOTION_OPTIONS,
   WIZARD_STEPS,
 } from '@/lib/types'
+import SymbolSearch from '@/components/SymbolSearch'
 import {
   ArrowLeft,
   Sparkles,
   Brain,
   Check,
+  X,
   TrendingUp,
   TrendingDown,
   ChevronRight,
@@ -27,12 +29,22 @@ import {
 function EnhanceButton({
   loading,
   disabled,
+  failed,
   onClick,
 }: {
   loading: boolean
   disabled: boolean
+  failed: boolean
   onClick: () => void
 }) {
+  if (failed) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs font-semibold mt-2" style={{ color: '#FF3D5A' }}>
+        <X className="w-3.5 h-3.5" />
+        Failed — try again
+      </span>
+    )
+  }
   return (
     <button
       onClick={onClick}
@@ -117,6 +129,7 @@ export default function NewTradePage() {
   const [enhancing, setEnhancing] = useState<string | null>(null)
 
   const [saved, setSaved] = useState(false)
+  const [enhanceFailed, setEnhanceFailed] = useState<string | null>(null)
 
   // ── Computed P&L ──
   const pnlData = (() => {
@@ -150,6 +163,7 @@ export default function NewTradePage() {
     const content = field === 'whyEntered' ? whyEntered : field === 'whatHappened' ? whatHappened : keyLesson
     if (content.trim().length < 10) return
     setEnhancing(field)
+    setEnhanceFailed(null)
     try {
       const res = await fetch('/api/ai/enhance', {
         method: 'POST',
@@ -160,14 +174,19 @@ export default function NewTradePage() {
           context: { symbol: symbol.toUpperCase(), direction, pnl: pnlData?.pnl ?? 0, isWin: pnlData?.isWin ?? false },
         }),
       })
+      if (!res.ok) throw new Error(`API ${res.status}`)
       const data = await res.json()
-      if (data.enhanced) {
-        if (field === 'whyEntered') setWhyEntered(data.enhanced)
-        else if (field === 'whatHappened') setWhatHappened(data.enhanced)
-        else setKeyLesson(data.enhanced)
-      }
-    } catch { /* silent */ }
-    finally { setEnhancing(null) }
+      if (!data.enhanced) throw new Error('Empty response')
+      if (field === 'whyEntered') setWhyEntered(data.enhanced)
+      else if (field === 'whatHappened') setWhatHappened(data.enhanced)
+      else setKeyLesson(data.enhanced)
+    } catch (err) {
+      console.error('Enhance failed:', err)
+      setEnhanceFailed(field)
+      setTimeout(() => setEnhanceFailed(null), 3000)
+    } finally {
+      setEnhancing(null)
+    }
   }
 
   const fetchInsight = async () => {
@@ -290,16 +309,7 @@ export default function NewTradePage() {
             <div className="space-y-4">
               <div>
                 <p className="text-text-muted text-xs uppercase tracking-widest mb-2">Symbol / Asset</p>
-                <input
-                  type="text"
-                  placeholder="e.g. AAPL, BTC, SPY"
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                  className={inputBase}
-                  style={inputStyle}
-                  autoCapitalize="characters"
-                  autoComplete="off"
-                />
+                <SymbolSearch value={symbol} onChange={setSymbol} />
               </div>
 
               <div>
@@ -423,6 +433,7 @@ export default function NewTradePage() {
                 <EnhanceButton
                   loading={enhancing === 'whyEntered'}
                   disabled={whyEntered.trim().length < 10}
+                  failed={enhanceFailed === 'whyEntered'}
                   onClick={() => handleEnhance('whyEntered')}
                 />
               </div>
@@ -450,6 +461,7 @@ export default function NewTradePage() {
                 <EnhanceButton
                   loading={enhancing === 'whatHappened'}
                   disabled={whatHappened.trim().length < 10}
+                  failed={enhanceFailed === 'whatHappened'}
                   onClick={() => handleEnhance('whatHappened')}
                 />
               </div>
@@ -477,6 +489,7 @@ export default function NewTradePage() {
                 <EnhanceButton
                   loading={enhancing === 'keyLesson'}
                   disabled={keyLesson.trim().length < 5}
+                  failed={enhanceFailed === 'keyLesson'}
                   onClick={() => handleEnhance('keyLesson')}
                 />
               </div>
