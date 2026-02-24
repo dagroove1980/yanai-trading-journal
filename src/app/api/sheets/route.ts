@@ -2,24 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL
 
-// Apps Script web apps always redirect once (302).
-// Node fetch changes POST→GET on redirect, so we follow manually.
+// Apps Script web apps redirect (302) to script.googleusercontent.com.
+// The redirect target only accepts GET — POST would return 405. The script
+// runs on the initial POST; the redirect Location points to the result.
 async function callAppsScript(body: object): Promise<{ ok: boolean }> {
   const url = APPS_SCRIPT_URL!
-  const init = {
-    method: 'POST' as const,
+  const res1 = await fetch(url, {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
     redirect: 'manual' as const,
-  }
+  })
 
-  const res1 = await fetch(url, init)
-
-  // Follow the redirect manually, keeping POST method
   if (res1.status === 301 || res1.status === 302) {
     const location = res1.headers.get('location')
     if (location) {
-      const res2 = await fetch(location, init)
+      const res2 = await fetch(location, { method: 'GET' })
       return res2.json()
     }
   }
