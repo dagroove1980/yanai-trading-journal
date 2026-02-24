@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getTrades, getStats } from '@/lib/storage'
+import { getTrades, getStats, setTrades as persistTrades } from '@/lib/storage'
 import { Trade } from '@/lib/types'
 import TradeCard from '@/components/TradeCard'
 import Navigation from '@/components/Navigation'
 import { AppLogo } from '@/components/Icons'
-import { syncAll } from '@/lib/sync'
+import { fetchTradesFromSheet, syncAll } from '@/lib/sync'
 import { Flame } from 'lucide-react'
 
 function StatCard({
@@ -41,10 +41,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     setMounted(true)
-    const trades = getTrades()
-    setTrades(trades)
-    // Sync all local trades to sheet once per session
-    if (trades.length > 0) syncAll(trades)
+    let cancelled = false
+    fetchTradesFromSheet().then(({ trades: sheetTrades, skipped }) => {
+      if (cancelled) return
+      if (!skipped) {
+        const local = getTrades()
+        const byId = new Map(sheetTrades.map((t) => [t.id, t]))
+        local.forEach((t) => { if (!byId.has(t.id)) byId.set(t.id, t) })
+        const merged = Array.from(byId.values()).sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        setTrades(merged)
+        persistTrades(merged)
+      } else {
+        const local = getTrades()
+        setTrades(local)
+        if (local.length > 0) syncAll(local)
+      }
+    })
+    return () => { cancelled = true }
   }, [])
 
   if (!mounted) {

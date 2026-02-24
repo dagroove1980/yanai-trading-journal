@@ -45,6 +45,34 @@ function ensureHeaders(sheet) {
   }
 }
 
+function rowToTrade(row) {
+  var r = row || [];
+  var resultVal = (r[9] || '').toString().toUpperCase();
+  var emotionVal = (r[13] || 'neutral').toString().toLowerCase();
+  var validEmotions = ['fearful', 'neutral', 'confident', 'greedy', 'excited'];
+  var ratingVal = parseInt(r[14], 10);
+  if (isNaN(ratingVal) || ratingVal < 1 || ratingVal > 5) ratingVal = 3;
+  return {
+    id: (r[0] || '').toString(),
+    date: (r[1] || '').toString(),
+    symbol: (r[2] || '').toString(),
+    direction: ((r[3] || '').toString().toLowerCase() === 'short') ? 'short' : 'long',
+    entryPrice: parseFloat(r[4]) || 0,
+    exitPrice: parseFloat(r[5]) || 0,
+    quantity: parseFloat(r[6]) || 0,
+    pnl: parseFloat(r[7]) || 0,
+    pnlPercent: parseFloat(r[8]) || 0,
+    isWin: resultVal === 'WIN',
+    whyEntered: (r[10] || '').toString(),
+    whatHappened: (r[11] || '').toString(),
+    keyLesson: (r[12] || '').toString(),
+    emotion: validEmotions.indexOf(emotionVal) >= 0 ? emotionVal : 'neutral',
+    rating: ratingVal,
+    aiInsight: (r[15] || '').toString() || undefined,
+    createdAt: (r[16] || new Date().toISOString()).toString()
+  };
+}
+
 function tradeToRow(t) {
   return [
     t.id          || '',
@@ -125,6 +153,19 @@ function doPost(e) {
         sheet.appendRow(row);
         colorRow(sheet, sheet.getLastRow(), trade.isWin);
       }
+    } else if (payload.action === 'getAll') {
+      var lastRow = sheet.getLastRow();
+      var trades = [];
+      if (lastRow >= 2) {
+        var data = sheet.getRange(2, 1, lastRow, HEADERS.length).getValues();
+        for (var j = 0; j < data.length; j++) {
+          var t = rowToTrade(data[j]);
+          if (t.id) trades.push(t);
+        }
+      }
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: true, trades: trades }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
     return ContentService

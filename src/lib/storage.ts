@@ -33,6 +33,12 @@ export function deleteTrade(id: string): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(trades))
 }
 
+/** Overwrites localStorage with trades (e.g. after fetching from sheet) */
+export function setTrades(trades: Trade[]): void {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(trades))
+}
+
 export function calculatePnL(
   direction: TradeDirection,
   entry: number,

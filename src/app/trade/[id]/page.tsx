@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getTradeById, saveTrade, deleteTrade, calculatePnL } from '@/lib/storage'
+import { getTradeById, saveTrade, deleteTrade, calculatePnL, setTrades as persistTrades } from '@/lib/storage'
 import { Trade, EMOTION_OPTIONS, TradeEmotion, TradeRating } from '@/lib/types'
 import { ArrowLeft, Edit2, Trash2, Check, X, Sparkles, Brain } from 'lucide-react'
 import { EMOTION_ICON_MAP } from '@/components/Icons'
-import { syncUpsert, syncDelete } from '@/lib/sync'
+import { syncUpsert, syncDelete, fetchTradesFromSheet } from '@/lib/sync'
 
 function Stars({
   rating,
@@ -58,8 +58,23 @@ export default function TradeDetailPage() {
 
   useEffect(() => {
     setMounted(true)
-    const t = getTradeById(id)
-    setTrade(t)
+    const loadTrade = () => {
+      setTrade(getTradeById(id))
+    }
+    const t0 = getTradeById(id)
+    if (t0) {
+      setTrade(t0)
+      return
+    }
+    fetchTradesFromSheet().then(({ trades: sheetTrades, skipped }) => {
+      if (!skipped && sheetTrades.length > 0) {
+        persistTrades(sheetTrades)
+        const found = sheetTrades.find((x) => x.id === id) ?? null
+        setTrade(found)
+      } else {
+        loadTrade()
+      }
+    })
   }, [id])
 
   if (!mounted) {

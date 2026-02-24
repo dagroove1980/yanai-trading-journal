@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getTrades, getStats } from '@/lib/storage'
+import { getTrades, getStats, setTrades as persistTrades } from '@/lib/storage'
 import { Trade } from '@/lib/types'
 import TradeCard from '@/components/TradeCard'
 import Navigation from '@/components/Navigation'
 import Link from 'next/link'
+import { fetchTradesFromSheet } from '@/lib/sync'
 
 type Filter = 'all' | 'wins' | 'losses'
 
@@ -17,7 +18,23 @@ export default function JournalPage() {
 
   useEffect(() => {
     setMounted(true)
-    setTrades(getTrades())
+    let cancelled = false
+    fetchTradesFromSheet().then(({ trades: sheetTrades, skipped }) => {
+      if (cancelled) return
+      if (!skipped) {
+        const local = getTrades()
+        const byId = new Map(sheetTrades.map((t) => [t.id, t]))
+        local.forEach((t) => { if (!byId.has(t.id)) byId.set(t.id, t) })
+        const merged = Array.from(byId.values()).sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        setTrades(merged)
+        persistTrades(merged)
+      } else {
+        setTrades(getTrades())
+      }
+    })
+    return () => { cancelled = true }
   }, [])
 
   if (!mounted) {
