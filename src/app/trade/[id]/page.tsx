@@ -34,6 +34,14 @@ function Stars({
   )
 }
 
+function formatTradeDate(dateStr: string): string {
+  if (!dateStr) return '—'
+  const dateOnly = dateStr.slice(0, 10)
+  const d = new Date(dateOnly + 'T12:00:00')
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+}
+
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-2.5 border-b border-border/50">
@@ -339,12 +347,7 @@ export default function TradeDetailPage() {
               </span>
             </div>
             <p className="text-text-muted text-sm">
-              {new Date(trade.date + 'T12:00:00').toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
+              {formatTradeDate(trade.date)}
             </p>
           </div>
           <div className="text-right">

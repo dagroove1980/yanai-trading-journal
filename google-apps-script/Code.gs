@@ -45,6 +45,27 @@ function ensureHeaders(sheet) {
   }
 }
 
+function toYYYYMMDD(val) {
+  if (!val && val !== 0) return '';
+  if (val instanceof Date) return Utilities.formatDate(val, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  if (typeof val === 'number') {
+    var d = new Date((val - 25569) * 24 * 60 * 60 * 1000);
+    return Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  var s = val.toString().trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  var parsed = new Date(s);
+  return isNaN(parsed.getTime()) ? s : Utilities.formatDate(parsed, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+function toISOString(val) {
+  if (!val && val !== 0) return new Date().toISOString();
+  if (val instanceof Date) return val.toISOString();
+  if (typeof val === 'number') return new Date((val - 25569) * 24 * 60 * 60 * 1000).toISOString();
+  var parsed = new Date(val.toString());
+  return isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+}
+
 function rowToTrade(row) {
   var r = row || [];
   var resultVal = (r[9] || '').toString().toUpperCase();
@@ -54,7 +75,7 @@ function rowToTrade(row) {
   if (isNaN(ratingVal) || ratingVal < 1 || ratingVal > 5) ratingVal = 3;
   return {
     id: (r[0] || '').toString(),
-    date: (r[1] || '').toString(),
+    date: toYYYYMMDD(r[1]),
     symbol: (r[2] || '').toString(),
     direction: ((r[3] || '').toString().toLowerCase() === 'short') ? 'short' : 'long',
     entryPrice: parseFloat(r[4]) || 0,
@@ -69,7 +90,7 @@ function rowToTrade(row) {
     emotion: validEmotions.indexOf(emotionVal) >= 0 ? emotionVal : 'neutral',
     rating: ratingVal,
     aiInsight: (r[15] || '').toString() || undefined,
-    createdAt: (r[16] || new Date().toISOString()).toString()
+    createdAt: toISOString(r[16])
   };
 }
 

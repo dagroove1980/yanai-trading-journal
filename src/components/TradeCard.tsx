@@ -5,6 +5,14 @@ import { Trade, EMOTION_OPTIONS } from '@/lib/types'
 import { EMOTION_ICON_MAP } from '@/components/Icons'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
+function formatTradeDate(dateStr: string): string {
+  if (!dateStr) return '—'
+  const dateOnly = dateStr.slice(0, 10)
+  const d = new Date(dateOnly + 'T12:00:00')
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
 function Stars({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
@@ -56,11 +64,7 @@ export default function TradeCard({ trade }: { trade: Trade }) {
               </span>
             </div>
             <p className="text-text-muted text-xs">
-              {new Date(trade.date + 'T12:00:00').toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-              })}
+              {formatTradeDate(trade.date)}
             </p>
           </div>
 
